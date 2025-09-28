@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cateye Nail Saloon</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; font-family:"Quicksand",sans-serif; background:#fdf6f0; color:#333; }
+
+    header { background:#d46a8d; color:#fff; padding:20px; text-align:center; }
+    header h1 { margin:0; font-family:'Dancing Script',cursive; font-size:40px; }
+
+    nav { background:#fff; padding:10px 0; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    nav ul { list-style:none; margin:0; padding:0; display:flex; justify-content:center; gap:20px; }
+    nav a { text-decoration:none; color:#d46a8d; font-weight:600; transition:0.3s; }
+    nav a:hover { color:#a63f65; }
+
+    .hero { background:url('https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat; color:#fff; text-align:center; padding:120px 20px; }
+    .hero h2 { font-family:'Dancing Script',cursive; font-size:50px; margin:0 0 10px; }
+    .hero p { font-size:20px; }
+
+    section { padding:60px 20px; text-align:center; }
+
+    /* Booking form */
+    #booking { background:#fff0f5; }
+    #booking h2 { font-family:'Dancing Script',cursive; font-size:36px; margin-bottom:20px; color:#d46a8d; }
+    form { max-width:500px; margin:0 auto; text-align:left; }
+    form input, form select, form textarea {
+      width:100%; padding:10px; margin:8px 0; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;
+    }
+    form button {
+      background:#d46a8d; color:#fff; border:none; padding:10px 20px;
+      border-radius:6px; font-weight:bold; cursor:pointer; transition:0.3s;
+    }
+    form button:hover { background:#a63f65; }
+
+    /* Services section */
+    .services { background:#fff; }
+    .services h2 {
+      font-family:'Dancing Script', cursive;
+      font-size:36px;
+      margin-bottom:30px;
+      color:#d46a8d;
+    }
+    .services-grid {
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+      max-width:500px;
+      margin:0 auto;
+    }
+    .service-card {
+      background:#fdf6f9;
+      border-radius:14px;
+      padding:20px;
+      text-align:left;
+      box-shadow:0 4px 15px rgba(0,0,0,0.1);
+      transition:0.3s;
+    }
+    .service-card:hover {
+      transform:translateY(-4px);
+      background:#ffe3ed;
+    }
+    .service-card h3 {
+      margin:0 0 6px;
+      font-size:18px;
+      color:#444;
+    }
+    .service-card p {
+      margin:0;
+      font-size:16px;
+      font-weight:bold;
+      color:#d46a8d;
+    }
+
+    footer {
+      background:#d46a8d; color:#fff; text-align:center; padding:20px;
+      font-size:14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Cateye Nail Saloon</h1>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="#booking">Κράτηση</a></li>
+      <li><a href="#services">Υπηρεσίες</a></li>
+      <li><a href="#contact">Επικοινωνία</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <h2>Καλώς ήρθες στο Cateye Nail Saloon</h2>
+    <p>Ομορφιά, χαλάρωση και στυλ σε κάθε ραντεβού ✨</p>
+  </section>
+
+  <!-- Booking Form -->
+  <section id="booking">
+    <h2>📅 Κλείσε Ραντεβού</h2>
+    <form id="bookingForm">
+      <input type="text" id="firstName" placeholder="Όνομα" required>
+      <input type="text" id="lastName" placeholder="Επώνυμο" required>
+      <input type="tel" id="phone" placeholder="Τηλέφωνο" required>
+      <input type="email" id="email" placeholder="Email" required>
+
+      <label>Υπηρεσία:</label>
+      <select id="serviceSelect" required></select>
+      <label>Ημερομηνία:</label>
+      <input type="date" id="dateInput" required>
+      <label>Ώρα:</label>
+      <input type="time" id="timeInput" required>
+      <textarea id="notes" placeholder="Σχόλια"></textarea>
+      <button type="submit">Αποστολή</button>
+    </form>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="services">
+    <div class="container">
+      <h2>💅 Οι Υπηρεσίες μας</h2>
+      <div id="servicesListPublic" class="services-grid"></div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <p>📍 Τοποθεσία: Καμένα Βούρλα, Ελλάδα</p>
+    <p>📞 Τηλέφωνο: +306972498640</p>
+    <p>✉️ Email: cataeyenailsaloon@gmail.com</p>
+    <p>&copy; 2025 Cateye Nail Saloon</p>
+  </footer>
+
+  <script>
+    let services = JSON.parse(localStorage.getItem("services")) || [];
+    let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+    let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+    function renderServicesPublic(){
+      const list=document.getElementById("servicesListPublic");
+      const select=document.getElementById("serviceSelect");
+      list.innerHTML="";
+      select.innerHTML="";
+      if(services.length===0){
+        list.innerHTML="<p>Δεν υπάρχουν διαθέσιμες υπηρεσίες αυτή τη στιγμή.</p>";
+      } else {
+        services.forEach(s=>{
+          let div=document.createElement("div");
+          div.className="service-card";
+          div.innerHTML=`<h3>${s.name}</h3><p>${s.price} €</p>`;
+          list.appendChild(div);
+
+          let opt=document.createElement("option");
+          opt.value=s.name;
+          opt.textContent=`${s.name} - ${s.price}€`;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit",function(e){
+      e.preventDefault();
+
+      let booking={
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        service: document.getElementById("serviceSelect").value,
+        date: document.getElementById("dateInput").value,
+        time: document.getElementById("timeInput").value,
+        notes: document.getElementById("notes").value
+      };
+
+      appointments.push(booking);
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+
+      // Καταχώρηση πελάτη αν δεν υπάρχει
+      let exists = clients.find(c => c.firstName===booking.firstName && c.lastName===booking.lastName && c.phone===booking.phone);
+      if(!exists){
+        clients.push({
+          firstName: booking.firstName,
+          lastName: booking.lastName,
+          phone: booking.phone,
+          email: booking.email,
+          address: "",
+          notes: ""
+        });
+        localStorage.setItem("clients", JSON.stringify(clients));
+      }
+
+      alert("Το ραντεβού σας καταχωρήθηκε με επιτυχία! ✅");
+      e.target.reset();
+    });
+
+    renderServicesPublic();
+  </script>
+
+</body>
+</html>

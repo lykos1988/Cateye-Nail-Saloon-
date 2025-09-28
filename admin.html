@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Διαχείριση Ραντεβού</title>
+<style>
+body { font-family:"Quicksand", sans-serif; background:#fdf6f0; color:#333; margin:0; padding:0;}
+header { background:#c9e4de; padding:15px; text-align:center; border-bottom:3px solid #fcd5ce;}
+header h1 { margin:0; color:#555;}
+section { padding:20px; display:none; transition: all 0.4s ease;}
+section.active { display:block; }
+.cards { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin-top:20px; }
+.card { background:#faedcd; padding:30px 20px; width:180px; border-radius:12px; cursor:pointer; transition:0.3s; font-weight:bold; font-size:18px; box-shadow:0 4px 12px rgba(0,0,0,0.2); text-align:center; }
+.card:hover { background:#fcd5ce; transform:translateY(-8px) scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+input, select, textarea { width:100%; padding:8px; margin:5px 0; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; transition:0.3s;}
+input:focus, select:focus, textarea:focus { border-color:#c9e4de; box-shadow:0 0 5px #c9e4de;}
+button { background:#c9e4de; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:5px; transition:0.2s; }
+button:hover { background:#a5d6a7; transform:scale(1.05);}
+button:active { transform:scale(0.95);}
+#clientList li, #appointmentList li, #servicesList li { background:#faedcd; margin:8px 0; padding:10px; border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.2); transition:0.3s; cursor:pointer;}
+#clientList li:hover, #appointmentList li:hover, #servicesList li:hover { transform:scale(1.03); box-shadow:0 6px 15px rgba(0,0,0,0.3); background:#fcd5ce;}
+#appointmentList li { display:flex; justify-content:space-between; align-items:center;}
+.appointment-actions button { margin-left:5px; transition:0.2s;}
+.appointment-actions button:hover { transform:scale(1.1);}
+.home-btn { margin-bottom:15px; background:#fcd5ce; transition:0.3s;}
+.home-btn:hover { transform:scale(1.05); }
+
+/* Modal Styles */
+.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.5);}
+.modal-content { background:#fff0f5; margin:10% auto; padding:20px; border-radius:12px; width:90%; max-width:500px; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+.close { position:absolute; top:10px; right:15px; font-size:24px; font-weight:bold; cursor:pointer; color:#333;}
+.close:hover { color:#a33;}
+.modal-content div { margin-bottom:8px; line-height:1.4em;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>📅 Διαχείριση Ραντεβού</h1>
+</header>
+
+<!-- Dashboard -->
+<section id="dashboard" class="active">
+<h2>Επιλογές</h2>
+<div class="cards">
+<div class="card" onclick="showSection('clientsSection')">Πελάτες</div>
+<div class="card" onclick="showSection('newClientSection')">Νέος Πελάτης</div>
+<div class="card" onclick="showSection('appointmentsSection')">Ραντεβού</div>
+<div class="card" onclick="showSection('appointmentModal')">Νέο Ραντεβού</div>
+<div class="card" onclick="showSection('servicesSection')">Υπηρεσίες</div>
+</div>
+</section>
+
+<!-- Πελάτες -->
+<section id="clientsSection">
+<button class="home-btn" onclick="showSection('dashboard')">🏠 Αρχική</button>
+<h2>Πελάτες</h2>
+<ul id="clientList"></ul>
+</section>
+
+<!-- Νέος Πελάτης -->
+<section id="newClientSection">
+<button class="home-btn" onclick="showSection('dashboard')">🏠 Αρχική</button>
+<h2>➕ Νέος Πελάτης</h2>
+<form id="newClientForm">
+<input type="text" id="clientFirstName" placeholder="Όνομα" required>
+<input type="text" id="clientLastName" placeholder="Επώνυμο" required>
+<input type="text" id="clientPhone" placeholder="Τηλέφωνο">
+<input type="email" id="clientEmail" placeholder="Email">
+<input type="text" id="clientAddress" placeholder="Διεύθυνση">
+<textarea id="clientNotes" placeholder="Σχόλια"></textarea>
+<button type="submit">Αποθήκευση</button>
+</form>
+</section>
+
+<!-- Ραντεβού -->
+<section id="appointmentsSection">
+<button class="home-btn" onclick="showSection('dashboard')">🏠 Αρχική</button>
+<h2>Ραντεβού</h2>
+<ul id="appointmentList"></ul>
+</section>
+
+<!-- Υπηρεσίες -->
+<section id="servicesSection">
+<button class="home-btn" onclick="showSection('dashboard')">🏠 Αρχική</button>
+<h2>Υπηρεσίες</h2>
+<form id="serviceForm">
+<input type="text" id="serviceName" placeholder="Υπηρεσία" required>
+<input type="number" id="servicePrice" placeholder="Τιμή" required>
+<button type="submit">Αποθήκευση</button>
+</form>
+<ul id="servicesList"></ul>
+</section>
+
+<!-- Νέο Ραντεβού -->
+<section id="appointmentModal">
+<button class="home-btn" onclick="showSection('dashboard')">🏠 Αρχική</button>
+<h2>Νέο Ραντεβού</h2>
+<form id="appointmentForm">
+<label>Πελάτης:</label>
+<select id="appointmentClient"></select>
+<label>Ημερομηνία:</label>
+<input type="date" id="dateInput" required>
+<label>Ώρα:</label>
+<input type="time" id="timeInput" required>
+<label>Υπηρεσία:</label>
+<select id="appointmentService" required></select>
+<label>Τιμή:</label>
+<input type="number" id="appointmentPrice" readonly>
+<label>Παρατηρήσεις:</label>
+<textarea id="notesInput"></textarea>
+<button type="submit">Αποθήκευση</button>
+</form>
+</section>
+
+<!-- Modal Προβολής -->
+<div id="viewModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>Λεπτομέρειες Ραντεβού</h2>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+let clients = JSON.parse(localStorage.getItem("clients")) || [];
+let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+let services = JSON.parse(localStorage.getItem("services")) || [];
+
+/* ---------- Sections ---------- */
+function showSection(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==='appointmentModal') { updateClientSelect(); updateServiceSelect(); }
+}
+
+/* ---------- Πελάτες ---------- */
+function renderClients(){
+  const list=document.getElementById("clientList");
+  list.innerHTML="";
+  clients.forEach((c,i)=>{
+    let li=document.createElement("li");
+    li.innerHTML=`${c.firstName} ${c.lastName} (${c.phone||"-"}) 
+      <button onclick="editClient(${i})">✏️</button>
+      <button onclick="deleteClient(${i})">🗑️</button>`;
+    list.appendChild(li);
+  });
+}
+function editClient(i){
+  let c=clients[i];
+  let fn=prompt("Όνομα:",c.firstName); if(fn===null)return;
+  let ln=prompt("Επώνυμο:",c.lastName); if(ln===null)return;
+  let ph=prompt("Τηλέφωνο:",c.phone); if(ph===null)return;
+  let em=prompt("Email:",c.email); if(em===null)return;
+  c.firstName=fn; c.lastName=ln; c.phone=ph; c.email=em;
+  localStorage.setItem("clients",JSON.stringify(clients));
+  renderClients();
+}
+function deleteClient(i){
+  if(confirm("Διαγραφή πελάτη;")){
+    clients.splice(i,1);
+    localStorage.setItem("clients",JSON.stringify(clients));
+    renderClients();
+  }
+}
+renderClients();
+
+document.getElementById("newClientForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  let newClient={
+    firstName: clientFirstName.value,
+    lastName: clientLastName.value,
+    phone: clientPhone.value,
+    email: clientEmail.value,
+    address: clientAddress.value,
+    notes: clientNotes.value
+  };
+  let exists = clients.find(c => c.firstName===newClient.firstName && c.lastName===newClient.lastName && c.phone===newClient.phone);
+  if(!exists){
+    clients.push(newClient);
+    localStorage.setItem("clients",JSON.stringify(clients));
+    renderClients();
+  }
+  e.target.reset();
+});
+
+/* ---------- Υπηρεσίες ---------- */
+function renderServices(){
+  const list=document.getElementById("servicesList");
+  list.innerHTML="";
+  services.forEach((s,i)=>{
+    let li=document.createElement("li");
+    li.innerHTML=`${s.name} - ${s.price}€
+      <button onclick="editService(${i})">✏️</button>
+      <button onclick="deleteService(${i})">🗑️</button>`;
+    list.appendChild(li);
+  });
+}
+function editService(i){
+  let s=services[i];
+  let n=prompt("Όνομα υπηρεσίας:",s.name); if(n===null)return;
+  let p=prompt("Τιμή:",s.price); if(p===null)return;
+  s.name=n; s.price=p;
+  localStorage.setItem("services",JSON.stringify(services));
+  renderServices();
+}
+function deleteService(i){
+  if(confirm("Διαγραφή υπηρεσίας;")){
+    services.splice(i,1);
+    localStorage.setItem("services",JSON.stringify(services));
+    renderServices();
+  }
+}
+document.getElementById("serviceForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  let s={name: serviceName.value, price: servicePrice.value};
+  services.push(s);
+  localStorage.setItem("services",JSON.stringify(services));
+  e.target.reset();
+  renderServices();
+});
+renderServices();
+
+/* ---------- Ραντεβού ---------- */
+function updateClientSelect(){
+  const sel=document.getElementById("appointmentClient");
+  sel.innerHTML="";
+  clients.forEach((c,i)=>{ 
+    let o=document.createElement("option"); 
+    o.value=i; 
+    o.textContent=c.firstName+" "+c.lastName; 
+    sel.appendChild(o); 
+  });
+}
+function updateServiceSelect(){
+  const sel=document.getElementById("appointmentService");
+  sel.innerHTML="";
+  services.forEach(s=>{
+    let o=document.createElement("option"); o.value=s.name; o.textContent=s.name; sel.appendChild(o);
+  });
+  updatePrice();
+}
+function updatePrice(){
+  const serviceName=appointmentService.value;
+  let s=services.find(s=>s.name===serviceName);
+  appointmentPrice.value=s ? s.price : "";
+}
+appointmentService.addEventListener("change",updatePrice);
+
+appointmentForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  let clientIndex = appointmentClient.value;
+  let client = clients[clientIndex];
+  if(!client) return;
+
+  let selectedService = services.find(s => s.name === appointmentService.value);
+
+  let a={
+    firstName: client.firstName,
+    lastName: client.lastName,
+    phone: client.phone,
+    email: client.email,
+    service: appointmentService.value,
+    date: dateInput.value,
+    time: timeInput.value,
+    price: selectedService ? selectedService.price : 0,
+    notes: notesInput.value,
+    status: "Εκκρεμεί"
+  };
+  appointments.push(a);
+  localStorage.setItem("appointments",JSON.stringify(appointments));
+  e.target.reset();
+  renderAppointmentList();
+  showSection('appointmentsSection');
+});
+
+function renderAppointmentList(){
+  const list = document.getElementById("appointmentList");
+  list.innerHTML = "";
+  appointments.sort((a,b)=> new Date(a.date+" "+a.time) - new Date(b.date+" "+b.time));
+  appointments.forEach((a,i)=>{
+    let li=document.createElement("li");
+    li.innerHTML = `<div>
+      <strong>${a.firstName} ${a.lastName}</strong> - ${a.date} ${a.time}<br>
+      ${a.service} - ${a.price}€<br>
+      <em>Κατάσταση: ${a.status}</em><br>
+      ${a.notes||""}
+    </div>
+    <div class="appointment-actions">
+      <button onclick="viewAppointment(${i})">👁️</button>
+      <button onclick="editAppointment(${i})">✏️</button>
+      <button onclick="updateStatus(${i})">⚡</button>
+      <button onclick="deleteAppointment(${i})">🗑️</button>
+    </div>`;
+    list.appendChild(li);
+  });
+}
+
+function viewAppointment(i){
+  const a = appointments[i];
+  let html = `<strong>Πελάτης:</strong> ${a.firstName} ${a.lastName}<br>
+              <strong>Τηλέφωνο:</strong> ${a.phone || '-'}<br>
+              <strong>Email:</strong> ${a.email || '-'}<br><hr>
+              <strong>Υπηρεσία:</strong> ${a.service}<br>
+              <strong>Ημερομηνία:</strong> ${a.date}<br>
+              <strong>Ώρα:</strong> ${a.time}<br>
+              <strong>Τιμή:</strong> ${a.price}€<br>
+              <strong>Κατάσταση:</strong> ${a.status}<br>
+              <strong>Παρατηρήσεις:</strong> ${a.notes || '-'}`;
+  modalContent.innerHTML = html;
+  viewModal.style.display="block";
+}
+function closeModal(){ viewModal.style.display="none"; }
+
+function deleteAppointment(i){
+  if(confirm("Διαγραφή ραντεβού;")){
+    appointments.splice(i,1);
+    localStorage.setItem("appointments",JSON.stringify(appointments));
+    renderAppointmentList();
+  }
+}
+function editAppointment(i){
+  let a=appointments[i];
+  let fn=prompt("Όνομα:",a.firstName); if(fn===null)return;
+  let ln=prompt("Επώνυμο:",a.lastName); if(ln===null)return;
+  let d=prompt("Ημερομηνία:",a.date); if(d===null)return;
+  let t=prompt("Ώρα:",a.time); if(t===null)return;
+  let s=prompt("Υπηρεσία:",a.service); if(s===null)return;
+  let p=prompt("Τιμή:",a.price); if(p===null)return;
+  let n=prompt("Παρατηρήσεις:",a.notes);
+  a.firstName=fn; a.lastName=ln; a.date=d; a.time=t; a.service=s; a.price=p; a.notes=n;
+  localStorage.setItem("appointments",JSON.stringify(appointments));
+  renderAppointmentList();
+}
+
+function updateStatus(i){
+  let a=appointments[i];
+  let newStatus = prompt("Κατάσταση ραντεβού (Εκτελέστηκε / Ακυρώθηκε / Εκκρεμεί):", a.status);
+  if(newStatus!==null){
+    a.status=newStatus;
+    localStorage.setItem("appointments",JSON.stringify(appointments));
+    renderAppointmentList();
+  }
+}
+
+renderAppointmentList();
+</script>
+
+</body>
+</html>
